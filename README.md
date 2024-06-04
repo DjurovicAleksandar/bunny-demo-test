@@ -1,9 +1,12 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Installation
+npm install && npm run dev
 
-## Getting Started
+## TUS BUNNY API REFERENCE
 
-.env 
+https://docs.bunny.net/reference/tus-resumable-uploads
 
+## ENV data
+ 
 NEXT_PUBLIC_BUNNY_API_KEY ="c6ba84a1-d839-4623-93a9-704d18670fd2664cad2a-1b2e-4de1-ae03-22449b9a0463"
 
 NEXT_PUBLIC_LIBRARY_API_KEY = "297a42c5-0e57-4c06-b2e6a5f008c1-8374-4b8d"
