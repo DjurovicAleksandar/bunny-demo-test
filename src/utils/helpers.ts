@@ -161,7 +161,8 @@ export const uploadFileToBunny = async (file: File) => {
 
     if (response.status === 201) {
       console.log("File uploaded successfully");
-      return `}${file.name}`;
+
+      return `${file.name}`;
     } else {
       throw new Error("Failed to upload file");
     }
@@ -171,82 +172,38 @@ export const uploadFileToBunny = async (file: File) => {
   }
 };
 
-// export const uploadFileToBunny = (file: File) => {
-//   return new Promise((resolve, reject) => {
-//     const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/${file.name}`;
-//     const xhr = new XMLHttpRequest();
-
-//     xhr.open("PUT", url, true);
-
-//     xhr.upload.onprogress = function (event) {
-//       if (event.lengthComputable) {
-//         const percentComplete = (event.loaded / event.total) * 100;
-//         console.log(`Upload progress: ${percentComplete.toFixed(2)}%`);
-//       }
-//     };
-
-//     xhr.onload = function () {
-//       if (xhr.status === 201) {
-//         console.log("File uploaded successfully");
-//         const fileUrl = `https://${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}.b-cdn.net/${file.name}`;
-//         resolve({
-//           id: file.name,
-//           url: fileUrl,
-//         });
-//       } else {
-//         console.error("Failed to upload file");
-//         reject(new Error("Failed to upload file"));
-//       }
-//     };
-
-//     xhr.onerror = function () {
-//       console.error("Error uploading file:", xhr.statusText);
-//       reject(new Error("Error uploading file"));
-//     };
-
-//     xhr.setRequestHeader(
-//       "AccessKey",
-//       process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY || ""
-//     );
-//     xhr.setRequestHeader("Content-Type", "application/octet-stream");
-//     xhr.setRequestHeader("Accept", "application/json");
-
-//     xhr.send(file);
-//   });
-// };
-
 export const downloadFileFromBunny = async (fileName: string) => {
-  const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/${fileName}`;
+  const url = `https://pull-files.b-cdn.net/${fileName}`;
+  console.log(url);
 
-  try {
-    const response = await fetch(url, {
-      method: "GET",
+  // try {
+  //   const response = await fetch(url, {
+  //     method: "GET",
+  //     headers: {
+  //       AccessKey: process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY || "",
+  //       accept: "*/*",
+  //     },
+  //   });
 
-      headers: {
-        AccessKey: process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY || "",
-        accept: "*/*",
-      },
-    });
+  //   if (response.ok) {
+  //     const blob = await response.blob();
 
-    if (response.ok) {
-      const blob = await response.blob();
+  const downloadUrl = url;
+  const a = document.createElement("a");
+  a.href = downloadUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-      console.log("File downloaded successfully");
-    } else {
-      throw new Error("Failed to download file");
-    }
-  } catch (error) {
-    console.error("Error downloading file:", error);
-    throw error;
-  }
+  console.log("File downloaded successfully");
+  //   } else {
+  //     throw new Error("Failed to download file");
+  //   }
+  // } catch (error) {
+  //   console.error("Error downloading file:", error);
+  //   throw error;
+  // }
 };
 
 export const getFileLIstFromStorage = async (
