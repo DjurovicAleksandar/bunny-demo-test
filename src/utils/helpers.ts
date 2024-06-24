@@ -1,5 +1,6 @@
 import * as tus from "tus-js-client";
 import { sha256 } from "js-sha256";
+import axios from "axios";
 
 //Get list of libraries from the Bunny
 export const getLibraryList = async (setLibraryList: (val: any[]) => void) => {
@@ -136,5 +137,159 @@ export const deleteVideoObject = async (videoID: string) => {
     }
   } catch (error) {
     console.error("Error deleting video object", error);
+  }
+};
+
+export const uploadFileToBunny = async (file: File) => {
+  const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/${file.name}`;
+
+  try {
+    const response = await axios.put(url, file, {
+      headers: {
+        AccessKey: process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY,
+        "Content-Type": "application/octet-stream",
+        Accept: "application/json",
+      },
+      onUploadProgress: (progressEvent: any) => {
+        if (!progressEvent.total) return;
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        console.log(`Upload Progress: ${percentCompleted}%`);
+      },
+    });
+
+    if (response.status === 201) {
+      console.log("File uploaded successfully");
+      return `}${file.name}`;
+    } else {
+      throw new Error("Failed to upload file");
+    }
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+};
+
+// export const uploadFileToBunny = (file: File) => {
+//   return new Promise((resolve, reject) => {
+//     const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/${file.name}`;
+//     const xhr = new XMLHttpRequest();
+
+//     xhr.open("PUT", url, true);
+
+//     xhr.upload.onprogress = function (event) {
+//       if (event.lengthComputable) {
+//         const percentComplete = (event.loaded / event.total) * 100;
+//         console.log(`Upload progress: ${percentComplete.toFixed(2)}%`);
+//       }
+//     };
+
+//     xhr.onload = function () {
+//       if (xhr.status === 201) {
+//         console.log("File uploaded successfully");
+//         const fileUrl = `https://${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}.b-cdn.net/${file.name}`;
+//         resolve({
+//           id: file.name,
+//           url: fileUrl,
+//         });
+//       } else {
+//         console.error("Failed to upload file");
+//         reject(new Error("Failed to upload file"));
+//       }
+//     };
+
+//     xhr.onerror = function () {
+//       console.error("Error uploading file:", xhr.statusText);
+//       reject(new Error("Error uploading file"));
+//     };
+
+//     xhr.setRequestHeader(
+//       "AccessKey",
+//       process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY || ""
+//     );
+//     xhr.setRequestHeader("Content-Type", "application/octet-stream");
+//     xhr.setRequestHeader("Accept", "application/json");
+
+//     xhr.send(file);
+//   });
+// };
+
+export const downloadFileFromBunny = async (fileName: string) => {
+  const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/${fileName}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+
+      headers: {
+        AccessKey: process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY || "",
+        accept: "*/*",
+      },
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      console.log("File downloaded successfully");
+    } else {
+      throw new Error("Failed to download file");
+    }
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    throw error;
+  }
+};
+
+export const getFileLIstFromStorage = async (
+  setFileList: (val: []) => void
+) => {
+  const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        AccessKey: process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY ?? "",
+        accept: "application/json",
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setFileList(data);
+      console.log("Files fetched successfully:", data);
+      return data;
+    } else {
+      throw new Error("Failed to fetch files");
+    }
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    throw error;
+  }
+};
+
+export const deleteFileFromBunny = async (fileName: string) => {
+  const url = `https://storage.bunnycdn.com/${process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE_NAME}/${fileName}`;
+
+  try {
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        AccessKey: process.env.NEXT_PUBLIC_BUNNY_STORAGE_API_KEY || "",
+      },
+    });
+    console.log(res);
+  } catch (error) {
+    console.error("Error delete file:", error);
+    throw error;
   }
 };

@@ -6,6 +6,7 @@ import {
   getLibraryList,
   handleVideoUpload,
 } from "@/utils/helpers";
+import Link from "next/link";
 
 export default function Home() {
   const [title, setTitle] = useState("");
@@ -51,6 +52,9 @@ export default function Home() {
       className={`flex  flex-col items-center justify-between p-24  text-white`}
     >
       <h1 className="text-8xl mb-10">Upload video to bunny</h1>
+      <h2 className="text-white text-4xl">
+        <Link href="/files">Go to files</Link>
+      </h2>
       <form
         className="flex flex-col gap-12  justify-center"
         onSubmit={handleSubmit}
